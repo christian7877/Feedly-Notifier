@@ -1,83 +1,80 @@
-"use strict";
+export default function (accessToken) {
+  this.accessToken = accessToken;
 
-let FeedlyApiClient = function (accessToken) {
+  let apiUrl = `http://${FEEDLY_API_URL}/`;
+  let secureApiUrl = `https://${FEEDLY_API_URL}/`;
+  let extensionVersion = chrome.runtime.getManifest().version;
 
-    this.accessToken = accessToken;
+  this.getMethodUrl = function (methodName, parameters, useSecureConnection) {
+    if (methodName === undefined) {
+      return "";
+    }
+    let methodUrl = (useSecureConnection ? secureApiUrl : apiUrl) + methodName;
 
-    let apiUrl = "http://cloud.feedly.com/v3/";
-    let secureApiUrl = "https://cloud.feedly.com/v3/";
-    let extensionVersion = chrome.runtime.getManifest().version;
+    let queryString = "?";
+    for (let parameterName in parameters) {
+      queryString += parameterName + "=" + parameters[parameterName] + "&";
+    }
 
-    this.getMethodUrl = function (methodName, parameters, useSecureConnection) {
-        if (methodName === undefined) {
-            return "";
-        }
-        let methodUrl = (useSecureConnection ? secureApiUrl : apiUrl) + methodName;
+    let browserPrefix;
+    // @if BROWSER='chrome'
+    browserPrefix = "c";
+    // @endif
 
-        let queryString = "?";
-        for (let parameterName in parameters) {
-            queryString += parameterName + "=" + parameters[parameterName] + "&";
-        }
+    // @if BROWSER='opera'
+    browserPrefix = "o";
+    // @endif
 
-        let browserPrefix;
-        // @if BROWSER='chrome'
-        browserPrefix = "c";
-        // @endif
+    // @if BROWSER='firefox'
+    browserPrefix = "f";
+    // @endif
 
-        // @if BROWSER='opera'
-        browserPrefix = "o";
-        // @endif
+    queryString += "av=" + browserPrefix + extensionVersion;
 
-        // @if BROWSER='firefox'
-        browserPrefix = "f";
-        // @endif
+    methodUrl += queryString;
 
-        queryString += "av=" + browserPrefix + extensionVersion;
+    return methodUrl;
+  };
 
-        methodUrl += queryString;
+  this.request = function (methodName, settings) {
+    function status(response) {
+      if (response.status === 200) {
+        return Promise.resolve(response);
+      } else {
+        return Promise.reject(response);
+      }
+    }
 
-        return methodUrl;
+    function json(response) {
+      return response.json().catch(function () {
+        return {};
+      });
+    }
+
+    let url = this.getMethodUrl(methodName, settings.parameters, settings.useSecureConnection);
+    let verb = settings.method || "GET";
+
+    // For bypassing the cache
+    if (verb === "GET") {
+      url += ((/\?/).test(url) ? "&" : "?") + "ck=" + (new Date()).getTime();
+    }
+
+    let headers = {};
+    if (this.accessToken) {
+      headers.Authorization = "OAuth " + this.accessToken;
+    }
+
+    let requestParameters = {
+      method: verb,
+      headers: headers
     };
 
-    this.request = function (methodName, settings) {
-        function status(response) {
-            if (response.status === 200) {
-                return Promise.resolve(response);
-            } else {
-                return Promise.reject(response);
-            }
-        }
+    if (settings.body) {
+      requestParameters.body = JSON.stringify(settings.body);
+    }
 
-        function json(response) {
-            return response.json().catch(function () {
-                return {};
-            });
-        }
-
-        let url = this.getMethodUrl(methodName, settings.parameters, settings.useSecureConnection);
-        let verb = settings.method || "GET";
-
-        // For bypassing the cache
-        if (verb === "GET") {
-            url += ((/\?/).test(url) ? "&" : "?") + "ck=" + (new Date()).getTime();
-        }
-
-        let headers = {};
-        if (this.accessToken) {
-            headers.Authorization = "OAuth " + this.accessToken;
-        }
-
-        let requestParameters = {
-            method: verb,
-            headers: headers
-        };
-
-        if (settings.body) {
-            requestParameters.body = JSON.stringify(settings.body);
-        }
-
-        return fetch(url, requestParameters)
-            .then(status)
-            .then(json);
-    };
+    return fetch(url, requestParameters)
+      .then(status)
+      .then(json);
+  };
 };
