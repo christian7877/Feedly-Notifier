@@ -6,8 +6,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = require('./build/config');
 
-console.log(typeof process.env.SANDBOX, process.env.SANDBOX ? config.api.sandbox : config.api.production);
-
 module.exports = {
   context: path.resolve(__dirname, `./${config.paths.src}/scripts`),
   entry: {

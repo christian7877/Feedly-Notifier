@@ -95,44 +95,8 @@ function parseFilters() {
   return filters;
 }
 
-/* Save all option in the chrome storage */
-function saveOptions() {
-  var options = {};
-  $("#options").find("input[data-option-name]").each(function (optionName, value) {
-    var optionControl = $(value);
-    var optionValue;
-    if (optionControl.attr("type") === "checkbox") {
-      optionValue = optionControl.is(":checked");
-    } else if (optionControl.attr("type") === "number") {
-      optionValue = Number(optionControl.val());
-    } else {
-      optionValue = optionControl.val();
-    }
-    options[optionControl.data("option-name")] = optionValue;
-  });
-  options.filters = parseFilters();
-
-  // @if BROWSER='chrome'
-  setBackgroundMode($("#enable-background-mode").is(":checked"));
-  // @endif
-
-  setAllSitesPermission($("#showBlogIconInNotifications").is(":checked") ||
-    $("#showThumbnailInNotifications").is(":checked"), options,
-    function () {
-      optionsGlobal.backgroundPage.appGlobal.syncStorage.set(options, function () {
-        alert(chrome.i18n.getMessage("OptionsSaved"));
-      });
-    });
-}
-
 function loadOptions() {
-  // @if BROWSER='chrome'
-  chrome.permissions.contains(optionsGlobal.backgroundPermission, function (enabled) {
-    $("#enable-background-mode").prop("checked", enabled);
-  });
-  // @endif
-
-  optionsGlobal.backgroundPage.appGlobal.syncStorage.get(null, function (items) {
+  optionsGlobal.backgroundPage.getOptions().then((items) => {
     var optionsForm = $("#options");
     for (var option in items) {
       var optionControl = optionsForm.find("input[data-option-name='" + option + "']");
@@ -143,15 +107,9 @@ function loadOptions() {
       }
     }
 
-    // @if BROWSER!='firefox'
-    chrome.permissions.contains(optionsGlobal.allSitesPermission, function (enabled) {
-      $("#showBlogIconInNotifications").prop("checked", enabled && items.showBlogIconInNotifications);
-      $("#showThumbnailInNotifications").prop("checked", enabled && items.showThumbnailInNotifications);
-
-      optionsForm.find("input").trigger("change");
-    });
-    // @endif
+    optionsForm.find("input").trigger("change");
   });
+  
   $("#header").text(chrome.i18n.getMessage("FeedlyNotifierOptions"));
   $("#options").find("[data-locale-value]").each(function () {
     var textBox = $(this);
@@ -160,33 +118,29 @@ function loadOptions() {
   });
 }
 
-// @if BROWSER='chrome'
-function setBackgroundMode(enable) {
-  if (enable) {
-    chrome.permissions.request(optionsGlobal.backgroundPermission, function () {});
-  } else {
-    chrome.permissions.remove(optionsGlobal.backgroundPermission, function () {});
-  }
-}
-// @endif
+function saveOptions() {
 
-function setAllSitesPermission(enable, options, callback) {
-  if (enable) {
-    browser.permissions.request(optionsGlobal.allSitesPermission)
-      .then(function (granted) {
-        if ($("#showThumbnailInNotifications").is(":checked")) {
-          $("#showThumbnailInNotifications").prop('checked', granted);
-          options.showThumbnailInNotifications = granted;
-        }
+  var options = {};
 
-        if ($("#showBlogIconInNotifications").is(":checked")) {
-          $("#showBlogIconInNotifications").prop('checked', granted);
-          options.showBlogIconInNotifications = granted;
-        }
+  $("#options").find("input[data-option-name]").each(function (optionName, value) {
+      var optionControl = $(value);
+      var optionValue;
+      if (optionControl.attr("type") === "checkbox") {
+          optionValue = optionControl.is(":checked");
+      } else if (optionControl.attr("type") === "number") {
+          optionValue = Number(optionControl.val());
+      } else {
+          optionValue = optionControl.val();
+      }
+      options[optionControl.data("option-name")] = optionValue;
+  });
 
-        callback();
-      });
-  } else {
-    callback();
-  }
+  options.filters = parseFilters();
+  options.enableBackgroundMode = $("#enable-background-mode").is(":checked");
+  options.showBlogIconInNotifications = $("#showBlogIconInNotifications").is(":checked");
+  options.showThumbnailInNotifications = $("#showThumbnailInNotifications").is(":checked");
+
+  optionsGlobal.backgroundPage.saveOptions(options).then(() => {
+      alert(chrome.i18n.getMessage("OptionsSaved"));
+  });
 }
