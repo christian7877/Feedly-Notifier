@@ -3,8 +3,8 @@
   "description": "Feedly Notifier is a tiny extension that keeps you up to date with your feedly subscriptions.",
   "scripts": {
     "build": "rollup -c",
-    "build:release": "cross-env NODE_ENV=production rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "manifest": "node tools/preprocess-manifest"
   },
   "dependencies": {
     "dompurify": "^1.0.9",

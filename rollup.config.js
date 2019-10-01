@@ -1,3 +1,5 @@
+import "dotenv-flow/config";
+
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
 import copy from "rollup-plugin-copy";
@@ -19,13 +21,13 @@ export default [
       commonjs(),
       preprocess({
         context: {
-          BROWSER: "chrome"
-        }
+          BROWSER: JSON.stringify(process.env.BROWSER),
+        },
       }),
       copy({
         targets: [{ src: `${paths.src}/options.html`, dest: paths.dist }]
-      })
-    ]
+      }),
+    ],
   },
   {
     input: `${paths.src}/scripts/popup.js`,
@@ -38,13 +40,13 @@ export default [
       commonjs(),
       preprocess({
         context: {
-          BROWSER: "chrome"
+          BROWSER: JSON.stringify(process.env.BROWSER),
         }
       }),
       copy({
         targets: [{ src: `${paths.src}/popup.html`, dest: paths.dist }]
-      })
-    ]
+      }),
+    ],
   },
   {
     input: `${paths.src}/scripts/core.js`,
@@ -71,9 +73,9 @@ export default [
       copy({
         targets: [
           { src: `${paths.src}/(_locales|images|sound|styles)`, dest: paths.dist }
-        ]
+        ],
       }),
-      execute("node tools/preprocess-manifest.js"),
-    ]
+      execute("npm run manifest"),
+    ],
   },
 ];
