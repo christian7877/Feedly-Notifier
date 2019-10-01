@@ -1,4 +1,9 @@
-"use strict";
+import $ from "jquery";
+import Mustache from "mustache";
+import DOMPurify from "dompurify";
+import timeago from "timeago.js";
+import "./timeago.fix";
+import "timeago.js/dist/timeago.locales.min.js";
 
 var popupGlobal = {
     feeds: [],
@@ -337,7 +342,7 @@ function renderCategories(container, feeds){
 }
 
 function renderTimeAgo(container) {
-    let timeagoInstance = timeago();
+    const timeagoInstance = timeago();
     let timeagoNodes = document.querySelectorAll(".timeago");
     timeagoInstance.render(timeagoNodes, window.navigator.language);
 }

@@ -1,14 +1,11 @@
-"use strict";
+let apiUrl = `http://${process.env.FEEDLY_CLOUD_URL}/v3/`;
+let secureApiUrl = `https://${process.env.FEEDLY_CLOUD_URL}/v3/`;
+let extensionVersion = chrome.runtime.getManifest().version;
 
-let FeedlyApiClient = function (accessToken) {
-
+export default function FeedlyApiClient(accessToken) {
     this.accessToken = accessToken;
 
-    let apiUrl = "http://cloud.feedly.com/v3/";
-    let secureApiUrl = "https://cloud.feedly.com/v3/";
-    let extensionVersion = chrome.runtime.getManifest().version;
-
-    this.getMethodUrl = function (methodName, parameters, useSecureConnection) {
+    this.getMethodUrl = function(methodName, parameters, useSecureConnection) {
         if (methodName === undefined) {
             return "";
         }

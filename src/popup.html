@@ -36,8 +36,6 @@
 </div>
 </body>
 
-<script src="scripts/jquery.min.js"></script>
-<script src="scripts/mustache.min.js"></script>
 <script id="feedTemplate" type="text/x-handlebars-template">
     {{#feeds}}
     <div class="item" data-id="{{id}}" data-categories="{{#categories}}{{encodedId}} {{/categories}}">
@@ -76,8 +74,7 @@
         {{{content}}}
     </div>
 </script>
-<script src="scripts/timeago.min.js"></script>
-<script src="scripts/timeago.locales.min.js"></script>
-<script src="scripts/purify.min.js"></script>
+
 <script src="scripts/popup.js"></script>
+
 </html>

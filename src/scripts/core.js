@@ -1,6 +1,8 @@
-"use strict";
+import browser from "webextension-polyfill";
 
-var appGlobal = {
+import FeedlyApiClient from "./feedly.api";
+
+export var appGlobal = {
     feedlyApiClient: new FeedlyApiClient(),
     icons: {
         default: {
@@ -103,14 +105,15 @@ var appGlobal = {
     notifications: {},
     isLoggedIn: false,
     intervalIds: [],
-    clientId: "",
-    clientSecret: "",
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
     getUserSubscriptionsPromise: null,
     environment: {
         os: ""
     },
     get feedlyUrl(){
-        return this.options.useSecureConnection ? "https://feedly.com" : "http://feedly.com";
+        const secure = this.options.useSecureConnection
+        return `${secure ? "https" : "http"}://${process.env.FEEDLY_URL}`;
     },
     get savedGroup(){
         return "user/" + this.options.feedlyUserId + "/tag/global.saved";
@@ -757,7 +760,7 @@ function parseFeeds(feedlyResponse) {
  * If the cache is empty, then it will be updated before return
  * forceUpdate, when is true, then cache will be updated
  */
-function getFeeds(forceUpdate, callback) {
+export function getFeeds(forceUpdate, callback) {
     if (appGlobal.cachedFeeds.length > 0 && !forceUpdate) {
         callback(appGlobal.cachedFeeds.slice(0), appGlobal.isLoggedIn);
     } else {
@@ -773,7 +776,7 @@ function getFeeds(forceUpdate, callback) {
  * If the cache is empty, then it will be updated before return
  * forceUpdate, when is true, then cache will be updated
  */
-function getSavedFeeds(forceUpdate, callback) {
+export function getSavedFeeds(forceUpdate, callback) {
     if (appGlobal.cachedSavedFeeds.length > 0 && !forceUpdate) {
         callback(appGlobal.cachedSavedFeeds.slice(0), appGlobal.isLoggedIn);
     } else {
@@ -810,7 +813,7 @@ function getUserSubscriptions(updateCache) {
  * array of the ID of feeds
  * The callback parameter should specify a function that looks like this:
  * function(boolean isLoggedIn) {...};*/
-function markAsRead(feedIds, callback) {
+export function markAsRead(feedIds, callback) {
     apiRequestWrapper("markers", {
         body: {
             action: "markAsRead",
@@ -844,7 +847,7 @@ function markAsRead(feedIds, callback) {
  * if saveFeed is true, then save the feeds, else unsafe them
  * The callback parameter should specify a function that looks like this:
  * function(boolean isLoggedIn) {...};*/
-function toggleSavedFeed(feedsIds, saveFeed, callback) {
+export function toggleSavedFeed(feedsIds, saveFeed, callback) {
     if (saveFeed) {
         apiRequestWrapper("tags/" + encodeURIComponent(appGlobal.savedGroup), {
             method: "PUT",
@@ -889,9 +892,9 @@ function toggleSavedFeed(feedsIds, saveFeed, callback) {
 /**
  * Authenticates the user and stores the access token to browser storage.
  */
-function getAccessToken(callback) {
+export function getAccessToken(callback) {
     let state = (new Date()).getTime();
-    let redirectUri = "https://olsh.github.io/Feedly-Notifier/";
+    let redirectUri = process.env.REDIRECT_URL;
     let url = appGlobal.feedlyApiClient.getMethodUrl("auth/auth", {
         response_type: "code",
         client_id: appGlobal.clientId,
@@ -939,7 +942,7 @@ function getAccessToken(callback) {
 /**
  * Refreshes the access token.
  */
-function refreshAccessToken(){
+export function refreshAccessToken(){
     if(!appGlobal.options.refreshToken) {
         setInactiveStatus();
 
@@ -971,7 +974,7 @@ function refreshAccessToken(){
 }
 
 /* Writes all application options in chrome storage and runs callback after it */
-function writeOptions(callback) {
+export function writeOptions(callback) {
     let options = {};
     for (let option in appGlobal.options) {
         // Do not store private fields in the options
@@ -989,7 +992,7 @@ function writeOptions(callback) {
 }
 
 /* Reads all options from chrome storage and runs callback after it */
-function readOptions(callback) {
+export function readOptions(callback) {
     appGlobal.syncStorage.get(null, function (options) {
         for (let optionName in options) {
             // Do not read private fields in the options
@@ -1011,7 +1014,7 @@ function readOptions(callback) {
     });
 }
 
-function apiRequestWrapper(methodName, settings) {
+export function apiRequestWrapper(methodName, settings) {
     if (!appGlobal.options.accessToken) {
         setInactiveStatus();
 
