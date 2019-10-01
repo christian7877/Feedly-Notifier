@@ -15,17 +15,17 @@ Changelog can be found [here](https://github.com/olsh/Feedly-Notifier/releases).
 
 1. Make `yarn` or `npm i`
 2. To build extension
-  - Sandbox: Run `npm run build` to get sandboxed version
+  - Sandbox: Run `npm run build` (by default)
   - Release: 
     - Use `.env.example` as template for `.env.local` and insert CLIENT_ID and CLIENT_SECRET
     - Run `npm run build`
-3. The result of the commands will be in `build` folder, now you can load the extension to browser.
+3. The result of the commands will be in `build` directory, now you can load the extension to browser.
 
 You can find actual `clientId` and `clientSecret` here https://groups.google.com/forum/#!topic/feedly-cloud/3izrTbT7FDQ
 
 We use [`dotenv-flow`](https://github.com/kerimdzhanov/dotenv-flow) to separate config from application code.
 
-The BROWSER environment varialbe can be `chrome`, `opera` or `firefox`.
+The BROWSER environment variable can be `chrome`, `opera` or `firefox`.
 
 ## Acknowledgments
 
