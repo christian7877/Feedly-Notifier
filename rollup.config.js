@@ -17,13 +17,13 @@ export default [
       format: "iife"
     },
     plugins: [
-      resolve(),
-      commonjs(),
       preprocess({
         context: {
-          BROWSER: JSON.stringify(process.env.BROWSER),
+          BROWSER: process.env.BROWSER,
         },
       }),
+      resolve(),
+      commonjs(),
       copy({
         targets: [{ src: `${paths.src}/options.html`, dest: paths.dist }]
       }),
@@ -36,13 +36,13 @@ export default [
       format: "iife"
     },
     plugins: [
-      resolve(),
-      commonjs(),
       preprocess({
         context: {
-          BROWSER: JSON.stringify(process.env.BROWSER),
+          BROWSER: process.env.BROWSER,
         }
       }),
+      resolve(),
+      commonjs(),
       copy({
         targets: [{ src: `${paths.src}/popup.html`, dest: paths.dist }]
       }),
@@ -65,7 +65,7 @@ export default [
       }),
       preprocess({
         context: {
-          BROWSER: JSON.stringify(process.env.BROWSER),
+          BROWSER: process.env.BROWSER,
         },
       }),
       resolve(),
