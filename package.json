@@ -4,7 +4,8 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "manifest": "node tools/preprocess-manifest"
+    "manifest": "node tools/preprocess-manifest",
+    "preprocess-options-page": "node tools/preprocess-options-page"
   },
   "dependencies": {
     "dompurify": "^1.0.9",

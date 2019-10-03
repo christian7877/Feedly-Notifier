@@ -7,13 +7,11 @@ import preprocess from "rollup-plugin-preprocess";
 import replace from "rollup-plugin-replace";
 import execute from "rollup-plugin-execute";
 
-import paths from "./tools/paths";
-
 export default [
   {
-    input: `${paths.src}/scripts/options.js`,
+    input: "src/scripts/options.js",
     output: {
-      file: `${paths.dist}/scripts/options.js`,
+      file: "build/scripts/options.js",
       format: "iife"
     },
     plugins: [
@@ -24,15 +22,18 @@ export default [
       }),
       resolve(),
       commonjs(),
-      copy({
-        targets: [{ src: `${paths.src}/options.html`, dest: paths.dist }]
+      preprocess({
+        context: {
+          BROWSER: process.env.BROWSER,
+        }
       }),
+      execute("npm run preprocess-options-page"),
     ],
   },
   {
-    input: `${paths.src}/scripts/popup.js`,
+    input: "src/scripts/popup.js",
     output: {
-      file: `${paths.dist}/scripts/popup.js`,
+      file: "build/scripts/popup.js",
       format: "iife"
     },
     plugins: [
@@ -44,15 +45,15 @@ export default [
       resolve(),
       commonjs(),
       copy({
-        targets: [{ src: `${paths.src}/popup.html`, dest: paths.dist }]
+        targets: [{ src: "src/popup.html", dest: "build" }]
       }),
     ],
   },
   {
-    input: `${paths.src}/scripts/core.js`,
+    input: "src/scripts/core.js",
     output: {
       name: "window",
-      file: `${paths.dist}/scripts/background.js`,
+      file: "build/scripts/background.js",
       format: "iife",
       extend: true
     },
@@ -72,7 +73,7 @@ export default [
       commonjs(),
       copy({
         targets: [
-          { src: `${paths.src}/(_locales|images|sound|styles)`, dest: paths.dist }
+          { src: "src/(_locales|images|sound|styles)", dest: "build" }
         ],
       }),
       execute("npm run manifest"),
