@@ -63,6 +63,7 @@ export default [
         "process.env.CLIENT_SECRET": JSON.stringify(process.env.CLIENT_SECRET),
         "process.env.FEEDLY_URL": JSON.stringify(process.env.FEEDLY_URL),
         "process.env.FEEDLY_CLOUD_URL": JSON.stringify(process.env.FEEDLY_CLOUD_URL),
+        "process.env.REDIRECT_URL": JSON.stringify(process.env.REDIRECT_URL),
       }),
       preprocess({
         context: {
